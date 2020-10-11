@@ -3,7 +3,7 @@ import {JSDOM} from'jsdom';
 import cheerio from 'cheerio';
 import fs = require('fs');
 
-const FILE_ALL_PERSON_NOT_PRESENT:string = "./data_all_person_not_present.csv"
+const FILE_PEOPLE_NOT_PRESENT:string = "./data_all_person_not_present.csv"
 
 let data:any = [];
 function getData(){
@@ -96,7 +96,7 @@ async function main(){
   // console.log('strHtml = ', strHtml);
   let lstRow:Array<any> = parsingTable(strHtml);
 
-  toCSV(lstRow, FILE_ALL_PERSON_NOT_PRESENT);
+  toCSV(lstRow, FILE_PEOPLE_NOT_PRESENT);
   getHisbyDate(lstRow);
 }
 
