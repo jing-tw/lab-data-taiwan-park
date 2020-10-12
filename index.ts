@@ -7,23 +7,25 @@ const FILE_PEOPLE_NOT_PRESENT:string = "./data_all_person_not_present.csv"
 const HOSTNAME:string = 'npm.cpami.gov.tw';
 const Path:string = '/news_2.aspx?search=yes&org=c951cdcd-b75a-46b9-8002-8ef952ec95fd&Con=DESC&pageset=5000';
 
-let data:any = [];
 function getData(){
-  return new Promise(resolve => {
+  return new Promise<Buffer>( (resolve, reject) => {
       const options = {
         hostname: HOSTNAME,
         port: 443,
         path: Path,
         method: 'GET'
       }
-      var req = https.request(options, (response:any) =>{
-          response.on('data', function (chunk:any) {
-          data.push(chunk);
+      let retByteBuffer:Buffer = Buffer.alloc(0);
+      https.request(options, (req:any) =>{
+        req.on('data', function (chunk:any) {
+          retByteBuffer = Buffer.concat([retByteBuffer, chunk]);
         });
 
-        response.on('end', function () {
-          resolve(data);
+        req.on('end', function () {
+          resolve(retByteBuffer);
         }); // end of cb
+
+        req.on('error', reject);
       }).end();
   });
 }
@@ -86,18 +88,9 @@ function getHisbyDate(lstRow:Array<any>){
   }
 }
 
-function bufArray2String(bufArray:Array<Buffer>):string {
-  let cache:Buffer = Buffer.alloc(0);
-  data.forEach((chunk:any) => {
-    cache = Buffer.concat([cache, chunk]);
-  });
-  return cache.toString();
-}
-
 async function main(){
-  let data:any = await getData();
-  const strHtml:string = bufArray2String(data);
-  // console.log('strHtml = ', strHtml);
+  let byteBuffer:Buffer = await getData();
+  const strHtml:string = byteBuffer.toString();
   let lstRow:Array<any> = parsingTable(strHtml);
 
   toCSV(lstRow, FILE_PEOPLE_NOT_PRESENT);
