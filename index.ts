@@ -4,14 +4,16 @@ import cheerio from 'cheerio';
 import fs = require('fs');
 
 const FILE_PEOPLE_NOT_PRESENT:string = "./data_all_person_not_present.csv"
+const HOSTNAME:string = 'npm.cpami.gov.tw';
+const Path:string = '/news_2.aspx?search=yes&org=c951cdcd-b75a-46b9-8002-8ef952ec95fd&Con=DESC&pageset=5000';
 
 let data:any = [];
 function getData(){
   return new Promise(resolve => {
       const options = {
-        hostname: 'npm.cpami.gov.tw',
+        hostname: HOSTNAME,
         port: 443,
-        path: '/news_2.aspx?search=yes&org=c951cdcd-b75a-46b9-8002-8ef952ec95fd&Con=DESC&pageset=5000',
+        path: Path,
         method: 'GET'
       }
       var req = https.request(options, (response:any) =>{
@@ -84,15 +86,17 @@ function getHisbyDate(lstRow:Array<any>){
   }
 }
 
+function bufArray2String(bufArray:Array<Buffer>):string {
+  let cache:Buffer = Buffer.alloc(0);
+  data.forEach((chunk:any) => {
+    cache = Buffer.concat([cache, chunk]);
+  });
+  return cache.toString();
+}
+
 async function main(){
   let data:any = await getData();
-
-  let strHtml:string="";
-  data.forEach((chunk:any) => {
-    // console.log('chunk = ', chunk.toString());
-    strHtml = strHtml + chunk.toString();
-  });
-
+  const strHtml:string = bufArray2String(data);
   // console.log('strHtml = ', strHtml);
   let lstRow:Array<any> = parsingTable(strHtml);
 

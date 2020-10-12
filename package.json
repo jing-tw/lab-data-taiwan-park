@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./index.js",
+    "run:app": "node ./index.js",
+    "start": "npm-run-all build run:app",
     "build": "tsc",
+    "watch:build": "tsc --watch",
     "clean": "rm -fr node_modules; find . -name \"*.js\" -type f|xargs rm -f; find . -name \"*.map\" -type f|xargs rm -f",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +24,7 @@
     "cheerio-tableparser": "^1.0.1",
     "https": "^1.0.0",
     "jsdom": "^16.4.0",
+    "npm-run-all": "^4.1.5",
     "table-scraper": "^1.0.3"
   }
 }
