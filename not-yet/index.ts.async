@@ -1,0 +1,132 @@
+import https = require('https');
+import cheerio from 'cheerio';
+import fs = require('fs');
+
+const FILE_PEOPLE_NOT_PRESENT:string = "./data_all_person_not_present.csv"
+const HOSTNAME:string = 'npm.cpami.gov.tw';
+const Path:string = '/news_2.aspx?search=yes&org=c951cdcd-b75a-46b9-8002-8ef952ec95fd&Con=DESC&pageset=5000';
+
+let data:any = [];
+let i:number = 0;
+function getData(lstRow:Array<any>){
+  return new Promise(resolve => {
+      const options = {
+        hostname: HOSTNAME,
+        port: 443,
+        path: Path,
+        method: 'GET'
+      }
+      var req = https.request(options, (response) =>{
+          response.on('data', function (bufChunk:Buffer) {
+          data.push(bufChunk);
+
+          //test
+          const $ = require('cheerio');
+          const strHtmlChunk =  bufChunk.toString();
+          console.log('strHtmlChunk = ', strHtmlChunk);
+          $('tr', strHtmlChunk).each(function(this:any) {
+            i = i + 1;
+            console.log('strHtmlChunk i = ', i);
+            let row:Array<string> = [];
+            $(this).find('td').each (function(this:any, col:any, td:any) {
+              // let strCell:string = $(this).text().replace(/\r?\n|\r/g, " ");
+              let strCell:string = $(this).text();
+              console.log('strHtmlChunk col = ', col, ' text = ', strCell);
+              row.push(strCell);
+            });
+            lstRow.push(row);
+
+          });
+          // end test
+
+        });
+
+        response.on('end', function () {
+          resolve(lstRow);
+        }); // end of cb
+      }).end();
+  });
+}
+
+function parsingTable(strHtml:string):Array<any>{
+    // table
+    let i:number = 0;
+    const $ = cheerio.load(strHtml.toString());
+    let lstRow:Array<any> = [];
+    $('tr').each(function(this:any) {
+      i = i + 1;
+      console.log('i = ', i);
+      let row:Array<string> = [];
+      $(this).find('td').each (function(this:any, col, td) {
+        
+        console.log('col = ', col, ' text = ', $(this).text());
+        // row['col='+col.toString()] = $(this).text();
+        row.push( $(this).text());
+      }); 
+      lstRow.push(row);
+
+    }); 
+    return lstRow;
+    // end of table
+}
+
+function tableToCsv(lstRow:Array<any>, strFilename:string){
+  if (fs.existsSync(strFilename)) {
+    fs.unlinkSync(strFilename); // remove the file
+  } 
+  
+  lstRow.forEach((row) => {
+    row.forEach( (strElement:string) => {
+      strElement = strElement.replace(/\r?\n|\r/g, " "); // replace \n
+      fs.appendFileSync(strFilename, strElement+',');
+    });
+    fs.appendFileSync(strFilename, '\n');
+
+  });
+}
+
+function getHisbyDate(lstRow:Array<any>){
+  let dictHis:any = {};
+  lstRow.forEach((row) => {
+    let strData:string = row[2];
+    if (typeof strData === 'undefined'){
+      return; 
+    }
+    strData = strData.replace(/\r?\n|\r/g, " "); // replace \n
+    if(!dictHis.hasOwnProperty(strData)){
+      dictHis[strData] = 0;
+    } else {
+      dictHis[strData] = dictHis[strData] + 1;
+    }
+    // console.log(strDate);
+  });
+
+  // print his
+  for (const [key, value] of Object.entries(dictHis)) {
+    console.log(key, value);
+  }
+}
+
+async function main(){
+  let lstRow:Array<any> = [];
+  await getData(lstRow);
+  tableToCsv(lstRow, FILE_PEOPLE_NOT_PRESENT);
+  // getHisbyDate(lstRow);
+
+  // let data:any = await getData();
+
+  // let strHtml:string="";
+  // data.forEach((bufChunk:any) => {
+  //   // console.log('bufChunk = ', bufChunk.toString());
+  //   strHtml = strHtml + bufChunk.toString();
+  // });
+
+  // console.log('strHtml = ', strHtml);
+  // let lstRow:Array<any> = parsingTable(strHtml);
+
+  // tableToCsv(lstRow, FILE_PEOPLE_NOT_PRESENT);
+  // getHisbyDate(lstRow);
+}
+
+main();
+

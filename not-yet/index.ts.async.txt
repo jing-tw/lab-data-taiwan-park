@@ -1,0 +1,1 @@
+issue: Can cheers handle streaming html string that divied by chunk?
