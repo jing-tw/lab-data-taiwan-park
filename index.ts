@@ -3,7 +3,7 @@ import {JSDOM} from'jsdom';
 import cheerio from 'cheerio';
 import fs = require('fs');
 
-const FILE_PEOPLE_NOT_PRESENT:string = "./data_all_person_not_present.csv"
+const FILE_PEOPLE_NOT_PRESENT:string = "./data_people_not_present.csv"
 const HOSTNAME:string = 'npm.cpami.gov.tw';
 const Path:string = '/news_2.aspx?search=yes&org=c951cdcd-b75a-46b9-8002-8ef952ec95fd&Con=DESC&pageset=5000';
 
