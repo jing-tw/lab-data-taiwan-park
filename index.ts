@@ -75,7 +75,7 @@ function getHisbyDate(lstRow:Array<any>){
     }
     strData = strData.replace(/\r?\n|\r/g, " "); // replace \n
     if(!hisMap.hasOwnProperty(strData)){
-      hisMap[strData] = 0;
+      hisMap[strData] = 1;
     } else {
       hisMap[strData] = hisMap[strData] + 1;
     }
