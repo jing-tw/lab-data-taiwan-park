@@ -46,16 +46,16 @@ function getData(){
         method: 'GET'
       }
       let retByteBuffer:Buffer = Buffer.alloc(0);
-      https.request(options, (req:any) =>{
-        req.on('data', function (chunk:any) {
+      https.request(options, (res:any) =>{
+        res.on('data', function (chunk:any) {
           retByteBuffer = Buffer.concat([retByteBuffer, chunk]);
         });
 
-        req.on('end', function () {
+        res.on('end', function () {
           resolve(retByteBuffer);
         }); // end of cb
 
-        req.on('error', reject);
+        res.on('error', reject);
       }).end();
   });
 }
